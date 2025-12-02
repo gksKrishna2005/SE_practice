@@ -220,34 +220,42 @@ ________________________________________
 3️⃣ Paste the script
 
 pipeline {
-agent any
-   tools{
-        maven 'MAVEN-HOME'
+    agent any
+    tools {
+        maven 'MAVEN_HOME'
     }
     stages {
-        stage('git repo & clean') {
+        stage('Checkout') {
             steps {
-                bat "git clone <provide your github link>"
-                bat "mvn clean -f mavenjava"
+                git(
+                    url: 'https://github.com/ParepalliViswambhar/maven-java.git',
+                    branch: 'main'
+                )
             }
         }
-        stage('install') {
+        stage('Clean') {
             steps {
-                bat "mvn install -f mavenjava"
+                bat "mvn clean"
             }
         }
-        stage('test') {
+        stage('Install') {
             steps {
-                bat "mvn test -f mavenjava"
+                bat "mvn install"
             }
         }
-        stage('package') {
+        stage('Test') {
             steps {
-                bat "mvn package -f mavenjava"
+                bat "mvn test"
+            }
+        }
+        stage('Package') {
+            steps {
+                bat "mvn package"
             }
         }
     }
 }
+
 
 Change:
 git clone <paste your GitHub URL>
