@@ -1,3 +1,92 @@
+Week 4: Maven-creation 
+Open Eclipse, click on file->click new->maven project->filter->quickstart(java),webapp(web application)->org.apache.maven.archetypes
+put some artifactid and then next, 
+click on project->run as->maven build->goals-> clean install test
+then run as java application or run on server 
+right click->show in local terminal->git bash 
+-----------------------------------------------------
+Question: Create a Docker Compose setup with a Node.js app and MongoDB.
+app.js
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const app = express();
+const port = 3000;
+const uri = "mongodb://mongo:27017/testdb";
+app.get('/', async (req, res) => {
+    try {
+        const client = new MongoClient(uri);
+        await client.connect();
+        const db = client.db("testdb");
+        const count = await db.collection("items").countDocuments();
+        res.send(`Connected to MongoDB. Documents count: ${count}`);
+        await client.close();
+    } catch (err) {
+        res.send("Error connecting to MongoDB: " + err);
+    }
+});
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+
+dockerfile
+FROM node:18
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3000
+CMD ["node", "app.js"]
+
+docker-compose.yml
+version: "3.9"
+services:
+  app:
+    build: .
+    container_name: node-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/testdb
+  mongo:
+    image: mongo:6
+    container_name: mongo-db
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+volumes:
+  mongo_data:
+
+command: docker-compose up --build
+----------------------------------------------------------------------------------------------------------------------------------------------
+Question: Write the Docker file and create the image and access the image in localhost
+
+app.js
+const http = require('http');
+const server = http.createServer((req, res) => {
+  res.end("Docker image is working on localhost!");
+});
+server.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+
+dockerfile
+FROM node:18
+WORKDIR /app
+COPY package*.json ./
+COPY app.js ./
+RUN npm install
+EXPOSE 3000
+CMD ["node", "app.js"]
+
+commands: 
+docker build -t my-node-app .
+docker run -d -p 3000:3000 --name mycontainer my-node-app
+docker stop mycontainer
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ✅ WEEK 8 — Jenkins Freestyle Jobs (VERY BEGINNER VERSION)
 Goal: Learn how to run Java & Web projects automatically using Jenkins.
 ________________________________________
